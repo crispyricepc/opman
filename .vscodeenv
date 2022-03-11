@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+
+alias opman="cargo run --release --quiet --"
