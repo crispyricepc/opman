@@ -1,8 +1,9 @@
+mod display;
 mod package_ops;
 
 use alpm::{Alpm, SigLevel};
 use clap::{Arg, ArgMatches, Command};
-use package_ops::summary;
+use package_ops::{dependencies, summary};
 
 fn init_handle() -> Alpm {
     let handle = Alpm::new("/", "/var/lib/pacman").unwrap();
@@ -29,9 +30,10 @@ fn build_command() -> ArgMatches {
                 .arg(Arg::new("packages").required(false).multiple_values(true)),
         )
         .subcommand(
-            Command::new("info")
-                .about("Get info about given packages")
-                .arg(Arg::new("packages").required(false).multiple_values(true)),
+            Command::new("dependencies")
+                .about("Get the given packages' dependencies")
+                .alias("deps")
+                .arg(Arg::new("packages").required(true).multiple_values(true)),
         )
         .subcommand(
             Command::new("install")
@@ -50,7 +52,14 @@ fn main() {
                 .values_of("packages")
                 .unwrap_or_default()
                 .collect();
-            summary(&handle, pkgs);
+            summary(&handle, &pkgs);
+        }
+        Some(("dependencies", dependencies_matches)) => {
+            let pkgs: Vec<&str> = dependencies_matches
+                .values_of("packages")
+                .unwrap_or_default()
+                .collect();
+            dependencies(&handle, &pkgs);
         }
         Some(("install", install_matches)) => {
             let _pkgs: Vec<&str> = install_matches

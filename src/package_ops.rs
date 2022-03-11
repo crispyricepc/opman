@@ -1,5 +1,6 @@
 use alpm::{Alpm, Db, Package, PackageReason};
-use bytesize::ByteSize;
+
+use crate::display::{print_package, print_summary};
 
 fn find_package<'a>(handle: &'a Alpm, pkgname: &str) -> Result<Package<'a>, String> {
     let mut dbs = vec![handle.localdb()];
@@ -12,7 +13,7 @@ fn find_package<'a>(handle: &'a Alpm, pkgname: &str) -> Result<Package<'a>, Stri
     Err(format!("Could not find package {}", pkgname))
 }
 
-fn find_packages<'a>(handle: &'a Alpm, pkgs: Vec<&str>) -> Result<Vec<Package<'a>>, String> {
+fn find_packages<'a>(handle: &'a Alpm, pkgs: &Vec<&str>) -> Result<Vec<Package<'a>>, String> {
     let mut packages = vec![];
     for pkgname in pkgs {
         // First search the local database
@@ -38,19 +39,22 @@ fn recurse_dependencies<'a>(handle: &'a Alpm, pkg: &Package, deps: &mut Vec<Pack
     }
 }
 
-fn summary_pkgs(handle: &Alpm, pkgs: &Vec<Package>) {
-    let mut pkgs_plus_deps = pkgs.clone();
+fn get_dependencies<'a>(handle: &'a Alpm, pkgs: Vec<Package<'a>>) -> Vec<Package<'a>> {
+    let mut deps = pkgs.clone();
     for pkg in pkgs {
-        recurse_dependencies(handle, pkg, &mut pkgs_plus_deps);
+        recurse_dependencies(handle, &pkg, &mut deps);
     }
+    deps
+}
 
+fn summary_pkgs(pkgs: &Vec<Package>) {
     let mut n_installed = 0i64;
     let mut n_bytes = 0i64;
     let mut n_explicit = 0i64;
     let mut n_dependencies = 0i64;
     let mut largest: Option<&Package> = None;
 
-    for pkg in &pkgs_plus_deps {
+    for pkg in pkgs {
         if largest.is_none() || pkg.isize() > largest.unwrap().isize() {
             largest = Some(pkg);
         }
@@ -68,23 +72,30 @@ fn summary_pkgs(handle: &Alpm, pkgs: &Vec<Package>) {
         n_bytes += pkg.isize();
     }
 
-    println!(
-        "Total Packages: {}\n{} installed, {} not installed, {} explicit, {} dependencies\nTotal size: {}\nLargest package: {} @ {}",
-        pkgs_plus_deps.len(),
-        n_installed,
-        pkgs_plus_deps.len() - n_installed as usize,
-        n_explicit,
-        n_dependencies,
-        ByteSize(n_bytes as u64),
-        largest.unwrap().name(),
-        ByteSize(largest.unwrap().isize() as u64)
-    );
+    print_summary(
+        pkgs.len(),
+        n_installed as usize,
+        n_explicit as usize,
+        n_dependencies as usize,
+        n_bytes as usize,
+        largest.unwrap(),
+    )
 }
 
-pub fn summary(handle: &Alpm, pkgs: Vec<&str>) {
+pub fn summary(handle: &Alpm, pkgs: &Vec<&str>) {
     if pkgs.len() > 0 {
-        summary_pkgs(handle, &find_packages(handle, pkgs).unwrap());
+        summary_pkgs(&get_dependencies(
+            handle,
+            find_packages(handle, pkgs).unwrap(),
+        ));
     } else {
-        summary_pkgs(handle, &handle.localdb().pkgs().iter().collect());
+        summary_pkgs(&handle.localdb().pkgs().iter().collect());
+    }
+}
+
+pub fn dependencies(handle: &Alpm, pkgs: &Vec<&str>) {
+    let deps = get_dependencies(handle, find_packages(handle, pkgs).unwrap());
+    for dep in deps {
+        print_package(&dep, false);
     }
 }
