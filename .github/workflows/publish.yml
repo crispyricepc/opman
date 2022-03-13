@@ -1,0 +1,28 @@
+name: Publish to AUR
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v2
+      - name: Generate PKGBUILD
+        run: ./ci/aur/generate-pkgbuild.sh
+      - name: Publish to AUR
+        uses: KSXGitHub/github-actions-deploy-aur@v2.2.5
+        with:
+          pkgname: opman-git
+          pkgbuild: ./ci/aur/PKGBUILD
+          commit_username: ${{ secrets.AUR_USERNAME }}
+          commit_email: ${{ secrets.AUR_EMAIL }}
+          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+          commit_message: Update AUR package
+          ssh_keyscan_types: rsa,dsa,ecdsa,ed25519
