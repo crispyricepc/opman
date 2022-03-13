@@ -15,12 +15,12 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-python@v2
       - name: Generate PKGBUILD
-        run: ./ci/aur/generate-pkgbuild.sh
+        run: ./ci/opman-git/generate-pkgbuild.sh
       - name: Publish to AUR
         uses: KSXGitHub/github-actions-deploy-aur@v2.2.5
         with:
           pkgname: opman-git
-          pkgbuild: ./ci/aur/PKGBUILD
+          pkgbuild: ./ci/opman-git/PKGBUILD
           commit_username: ${{ secrets.AUR_USERNAME }}
           commit_email: ${{ secrets.AUR_EMAIL }}
           ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
