@@ -1,23 +1,9 @@
 mod display;
 mod package_ops;
 
-use alpm::{Alpm, SigLevel};
 use clap::{Arg, ArgMatches, Command};
-use package_ops::{dependencies, summary};
-
-fn init_handle() -> Alpm {
-    let handle = Alpm::new("/", "/var/lib/pacman").unwrap();
-    handle
-        .register_syncdb("core", SigLevel::USE_DEFAULT)
-        .unwrap();
-    handle
-        .register_syncdb("extra", SigLevel::USE_DEFAULT)
-        .unwrap();
-    handle
-        .register_syncdb("community", SigLevel::USE_DEFAULT)
-        .unwrap();
-    handle
-}
+use fern::colors::{Color, ColoredLevelConfig};
+use package_ops::PackageOps;
 
 fn build_command() -> ArgMatches {
     Command::new("opman")
@@ -36,6 +22,11 @@ fn build_command() -> ArgMatches {
                 .arg(Arg::new("packages").required(true).multiple_values(true)),
         )
         .subcommand(
+            Command::new("search")
+                .about("Search for packages")
+                .arg(Arg::new("query").required(true).multiple_values(true)),
+        )
+        .subcommand(
             Command::new("install")
                 .about("Install a package")
                 .arg(Arg::new("packages").required(true).multiple_values(true)),
@@ -43,8 +34,33 @@ fn build_command() -> ArgMatches {
         .get_matches()
 }
 
+fn build_logger() -> Result<(), fern::InitError> {
+    let colors = ColoredLevelConfig::new()
+        .info(Color::Green)
+        .trace(Color::Yellow)
+        .debug(Color::Blue)
+        .warn(Color::Yellow);
+
+    fern::Dispatch::new()
+        .format(move |out, message, record| {
+            out.finish(format_args!(
+                "[{}] [{}] {}",
+                chrono::Local::now().format("%H:%M:%S"),
+                colors.color(record.level()),
+                message
+            ))
+        })
+        .level(log::LevelFilter::Info)
+        .chain(std::io::stderr())
+        .apply()?;
+    Ok(())
+}
+
 fn main() {
-    let handle = init_handle();
+    // Initialize logger
+    build_logger().unwrap();
+
+    let ops = PackageOps::new();
 
     match build_command().subcommand() {
         Some(("summary", summary_matches)) => {
@@ -52,20 +68,28 @@ fn main() {
                 .values_of("packages")
                 .unwrap_or_default()
                 .collect();
-            summary(&handle, &pkgs);
+            ops.summary(&pkgs);
         }
         Some(("dependencies", dependencies_matches)) => {
             let pkgs: Vec<&str> = dependencies_matches
                 .values_of("packages")
                 .unwrap_or_default()
                 .collect();
-            dependencies(&handle, &pkgs);
+            ops.dependencies(&pkgs);
+        }
+        Some(("search", search_matches)) => {
+            let queries: Vec<&str> = search_matches
+                .values_of("query")
+                .unwrap_or_default()
+                .collect();
+            ops.search(&queries);
         }
         Some(("install", install_matches)) => {
-            let _pkgs: Vec<&str> = install_matches
+            let pkgs: Vec<&str> = install_matches
                 .values_of("packages")
                 .unwrap_or_default()
                 .collect();
+            ops.install(&pkgs);
         }
         _ => {
             println!("No subcommand was used");

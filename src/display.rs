@@ -21,7 +21,7 @@ pub fn print_summary(
     n_explicit: usize,
     n_dependencies: usize,
     n_bytes: usize,
-    largest: &Package,
+    largest: Package,
 ) {
     println!(
         "Total Packages: {}\n{} installed, {} not installed, {} explicit, {} dependencies\nTotal size: {}\nLargest package: {} @ {}",
