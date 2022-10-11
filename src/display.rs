@@ -11,7 +11,7 @@ pub fn print_package(pkg: &Package, compact: bool) {
     if !compact {
         println!("\n\t{}", pkg.desc().unwrap());
     } else {
-        println!("");
+        println!();
     }
 }
 

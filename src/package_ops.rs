@@ -14,16 +14,16 @@ impl PackageOps {
         dbs
     }
 
-    fn find_package(&self, pkgname: &str) -> Result<Package, String> {
+    fn find_package(&self, pkgname: String) -> Result<Package, String> {
         for db in self.dbs() {
-            if let Ok(pkg) = db.pkg(pkgname) {
+            if let Ok(pkg) = db.pkg(pkgname.clone()) {
                 return Ok(pkg);
             }
         }
         Err(format!("Could not find package {}", pkgname))
     }
 
-    fn find_packages(&self, pkgs: &Vec<&str>) -> Result<Vec<Package>, String> {
+    fn find_packages(&self, pkgs: Vec<String>) -> Result<Vec<Package>, String> {
         let mut packages = vec![];
         for pkgname in pkgs {
             // First search the local database
@@ -37,7 +37,7 @@ impl PackageOps {
         Ok(packages)
     }
 
-    fn search_packages<'a>(&'a self, queries: &Vec<&str>) -> AlpmListMut<Package<'a>> {
+    fn search_packages<'a>(&'a self, queries: Vec<String>) -> AlpmListMut<Package<'a>> {
         info!("Searching for packages");
         let mut pkgs = AlpmListMut::new(&self.handle);
         for db in self.dbs() {
@@ -52,7 +52,7 @@ impl PackageOps {
             if deps.iter().any(|d| d.name() == dep.name()) {
                 continue;
             }
-            if let Ok(dep_pkg) = self.find_package(dep.name()) {
+            if let Ok(dep_pkg) = self.find_package(dep.name().to_owned()) {
                 deps.push(dep_pkg.clone());
                 self.recurse_dependencies(dep_pkg, deps);
             }
@@ -116,7 +116,7 @@ impl PackageOps {
         PackageOps { handle }
     }
 
-    pub fn summary(self, pkgs: &Vec<&str>) {
+    pub fn summary(self, pkgs: Vec<String>) {
         info!("Building package summary");
         if pkgs.len() > 0 {
             self.summary_pkgs(&self.get_dependencies(self.find_packages(pkgs).unwrap()));
@@ -125,21 +125,21 @@ impl PackageOps {
         }
     }
 
-    pub fn dependencies(&self, pkgs: &Vec<&str>) {
+    pub fn dependencies(&self, pkgs: Vec<String>) {
         let deps = self.get_dependencies(self.find_packages(pkgs).unwrap());
         for dep in deps {
             print_package(&dep, false);
         }
     }
 
-    pub fn search(&self, queries: &Vec<&str>) {
+    pub fn search(&self, queries: Vec<String>) {
         let pkgs = self.search_packages(queries);
         for pkg in pkgs {
             print_package(&pkg, false);
         }
     }
 
-    pub fn install(&self, _pkgs: &Vec<&str>) {
+    pub fn install(&self, _pkgs: Vec<String>) {
         panic!("Not implemented");
     }
 }

@@ -1,37 +1,29 @@
 mod display;
 mod package_ops;
 
-use clap::{Arg, ArgMatches, Command};
+use clap::{command, Parser, Subcommand};
 use fern::colors::{Color, ColoredLevelConfig};
 use package_ops::PackageOps;
 
-fn build_command() -> ArgMatches {
-    Command::new("opman")
-        .version("0.0.1")
-        .author("Ben Mitchell")
-        .about("Opinionated Archlinux Package Manager")
-        .subcommand(
-            Command::new("summary")
-                .about("Summarize the given packages")
-                .arg(Arg::new("packages").required(false).multiple_values(true)),
-        )
-        .subcommand(
-            Command::new("dependencies")
-                .about("Get the given packages' dependencies")
-                .alias("deps")
-                .arg(Arg::new("packages").required(true).multiple_values(true)),
-        )
-        .subcommand(
-            Command::new("search")
-                .about("Search for packages")
-                .arg(Arg::new("query").required(true).multiple_values(true)),
-        )
-        .subcommand(
-            Command::new("install")
-                .about("Install a package")
-                .arg(Arg::new("packages").required(true).multiple_values(true)),
-        )
-        .get_matches()
+/// Opman - Opinionated Package Manager for ArchLinux
+///
+/// todo: long about
+#[derive(Parser)]
+struct Cli {
+    #[command(subcommand)]
+    command: Action,
+}
+
+#[derive(Subcommand)]
+enum Action {
+    /// Summarize the given packages
+    Summary { packages: Vec<String> },
+    /// Get the given packages' dependencies
+    Dependencies { packages: Vec<String> },
+    /// Search for packages
+    Search { keywords: Vec<String> },
+    /// Install a package
+    Install { packages: Vec<String> },
 }
 
 fn build_logger() -> Result<(), fern::InitError> {
@@ -62,37 +54,12 @@ fn main() {
 
     let ops = PackageOps::new();
 
-    match build_command().subcommand() {
-        Some(("summary", summary_matches)) => {
-            let pkgs: Vec<&str> = summary_matches
-                .values_of("packages")
-                .unwrap_or_default()
-                .collect();
-            ops.summary(&pkgs);
-        }
-        Some(("dependencies", dependencies_matches)) => {
-            let pkgs: Vec<&str> = dependencies_matches
-                .values_of("packages")
-                .unwrap_or_default()
-                .collect();
-            ops.dependencies(&pkgs);
-        }
-        Some(("search", search_matches)) => {
-            let queries: Vec<&str> = search_matches
-                .values_of("query")
-                .unwrap_or_default()
-                .collect();
-            ops.search(&queries);
-        }
-        Some(("install", install_matches)) => {
-            let pkgs: Vec<&str> = install_matches
-                .values_of("packages")
-                .unwrap_or_default()
-                .collect();
-            ops.install(&pkgs);
-        }
-        _ => {
-            println!("No subcommand was used");
-        }
+    let cli = Cli::parse();
+
+    match cli.command {
+        Action::Summary { packages } => ops.summary(packages),
+        Action::Dependencies { packages } => ops.dependencies(packages),
+        Action::Search { keywords } => ops.search(keywords),
+        Action::Install { packages } => ops.install(packages),
     }
 }
