@@ -1,9 +1,6 @@
-mod display;
-mod package_ops;
-
 use clap::{command, Parser, Subcommand};
 use fern::colors::{Color, ColoredLevelConfig};
-use package_ops::PackageOps;
+use libopman::PackageOps;
 
 /// Opman - Opinionated Package Manager for ArchLinux
 ///

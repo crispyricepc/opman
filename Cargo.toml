@@ -4,6 +4,8 @@ version = "0.0.1"
 edition = "2021"
 
 [dependencies]
+libopman = { path = "./libopman", version = "0.1.0" }
+libopman_derive = { path = "./libopman_derive", version = "0.1.0" }
 alpm = "2.2.1"
 bytesize = "1.1.0"
 chrono = "0.4.19"

@@ -290,6 +290,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "68783febc7782c6c5cb401fbda4de5a9898be1762314da0bb2c10ced61f18b0c"
 
 [[package]]
+name = "libopman"
+version = "0.1.0"
+dependencies = [
+ "alpm",
+ "bytesize",
+ "log",
+]
+
+[[package]]
+name = "libopman_derive"
+version = "0.1.0"
+
+[[package]]
 name = "link-cplusplus"
 version = "1.0.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -341,6 +354,8 @@ dependencies = [
  "chrono",
  "clap",
  "fern",
+ "libopman",
+ "libopman_derive",
  "log",
  "pbr",
 ]
