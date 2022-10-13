@@ -1,6 +1,14 @@
+mod database;
+mod display;
+mod package;
+mod package_ops;
+
+pub use database::Database;
+pub use package::Package;
+
 use clap::{command, Parser, Subcommand};
 use fern::colors::{Color, ColoredLevelConfig};
-use libopman::PackageOps;
+use package_ops::PackageOps;
 
 /// Opman - Opinionated Package Manager for ArchLinux
 ///
