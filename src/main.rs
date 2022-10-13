@@ -4,11 +4,12 @@ mod package;
 mod package_ops;
 
 pub use database::Database;
+use database::{handle, Pacman};
+use package::AlpmPackage;
 pub use package::Package;
 
 use clap::{command, Parser, Subcommand};
 use fern::colors::{Color, ColoredLevelConfig};
-use package_ops::PackageOps;
 
 /// Opman - Opinionated Package Manager for ArchLinux
 ///
@@ -57,14 +58,24 @@ fn main() {
     // Initialize logger
     build_logger().unwrap();
 
-    let ops = PackageOps::new();
+    let handle = handle();
+    let db = &handle.syncdbs().into_iter().next().unwrap();
+    let sync = Pacman::new(db);
 
     let cli = Cli::parse();
 
     match cli.command {
-        Action::Summary { packages } => ops.summary(packages),
-        Action::Dependencies { packages } => ops.dependencies(packages),
-        Action::Search { keywords } => ops.search(keywords),
-        Action::Install { packages } => ops.install(packages),
+        Action::Summary { packages: _ } => todo!(),
+        Action::Dependencies { packages } => {
+            let pkgs = packages
+                .into_iter()
+                .filter_map(|pkg| sync.get_package(pkg))
+                .collect::<Vec<AlpmPackage>>();
+            sync.dependencies(&pkgs);
+        }
+        Action::Search { keywords } => {
+            sync.search(keywords);
+        }
+        Action::Install { packages: _ } => todo!(),
     }
 }

@@ -14,7 +14,7 @@ use crate::Package;
 ///
 /// Seems wasteful to get a new handle each time this function is called but
 /// alpm doesn't implement Sync so we can't use a static variable.
-pub fn _handle() -> Alpm {
+pub fn handle() -> Alpm {
     let handle = Alpm::new("/", "/var/lib/pacman").unwrap();
     handle
         .register_syncdb("core", SigLevel::USE_DEFAULT)
@@ -33,7 +33,7 @@ where
     Pkg: Package + Hash + Eq,
 {
     /// Get a package by its name
-    fn get_package(&self, name: &str) -> Option<Pkg>;
+    fn get_package(&self, name: String) -> Option<Pkg>;
     /// Get all the packages in the database
     fn get_packages(&self) -> Vec<Pkg>;
     /// Search for packages by queries
@@ -53,7 +53,7 @@ where
 
         let deps_strs = self.dependencies(pkgs);
         for dep_str in deps_strs {
-            if let Some(dep) = self.get_package(&dep_str) {
+            if let Some(dep) = self.get_package(dep_str) {
                 let (dep_deps, dep_unresolved) = self.dependencies_recursive(&vec![dep]);
                 deps.extend(dep_deps);
                 unresolved.extend(dep_unresolved);

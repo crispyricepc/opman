@@ -7,26 +7,22 @@ use crate::{package::alpm_package::AlpmPackage, Package};
 
 use super::Database;
 
-pub struct Pacman {
-    db: Db<'static>,
+pub struct Pacman<'h> {
+    db: &'h Db<'h>,
 }
 
-impl Pacman {
-    pub fn _new(db: Db<'static>) -> Self {
+impl<'h> Pacman<'h> {
+    pub fn new(db: &'h Db) -> Self {
         Self { db }
     }
 }
 
-impl Database<AlpmPackage> for Pacman {
-    fn get_package(&self, name: &str) -> Option<AlpmPackage> {
-        self.db
-            .pkg(name)
-            .as_ref()
-            .map(|pkg| AlpmPackage::from(*pkg))
-            .ok()
+impl<'h> Database<AlpmPackage<'h>> for Pacman<'h> {
+    fn get_package(&self, name: String) -> Option<AlpmPackage<'h>> {
+        self.db.pkg(name).map(|pkg| AlpmPackage::from(pkg)).ok()
     }
 
-    fn get_packages(&self) -> Vec<AlpmPackage> {
+    fn get_packages(&self) -> Vec<AlpmPackage<'h>> {
         self.db
             .pkgs()
             .into_iter()
@@ -34,7 +30,7 @@ impl Database<AlpmPackage> for Pacman {
             .collect()
     }
 
-    fn search(&self, queries: Vec<String>) -> Vec<AlpmPackage> {
+    fn search(&self, queries: Vec<String>) -> Vec<AlpmPackage<'h>> {
         match self.db.search(queries.into_iter()) {
             Ok(results) => results
                 .into_iter()

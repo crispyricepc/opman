@@ -7,7 +7,7 @@ use super::Database;
 pub struct Aur;
 
 impl Database<AurPackage> for Aur {
-    fn get_package(&self, _name: &str) -> Option<AurPackage> {
+    fn get_package(&self, _name: String) -> Option<AurPackage> {
         todo!()
     }
 

@@ -4,11 +4,11 @@ use alpm::Dep;
 
 use crate::Package;
 
-pub struct AlpmPackage {
-    inner: alpm::Package<'static>,
+pub struct AlpmPackage<'h> {
+    inner: alpm::Package<'h>,
 }
 
-impl Package for AlpmPackage {
+impl<'h> Package for AlpmPackage<'h> {
     fn name(&self) -> String {
         todo!()
     }
@@ -90,21 +90,21 @@ impl Package for AlpmPackage {
     }
 }
 
-impl From<alpm::Package<'static>> for AlpmPackage {
-    fn from(value: alpm::Package<'static>) -> Self {
+impl<'h> From<alpm::Package<'h>> for AlpmPackage<'h> {
+    fn from(value: alpm::Package<'h>) -> Self {
         Self { inner: value }
     }
 }
 
-impl PartialEq for AlpmPackage {
+impl PartialEq for AlpmPackage<'_> {
     fn eq(&self, other: &Self) -> bool {
         self.inner.name() == other.inner.name()
     }
 }
 
-impl Eq for AlpmPackage {}
+impl Eq for AlpmPackage<'_> {}
 
-impl Hash for AlpmPackage {
+impl Hash for AlpmPackage<'_> {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.inner.name().hash(state);
     }
