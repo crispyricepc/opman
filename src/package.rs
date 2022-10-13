@@ -1,9 +1,10 @@
 pub mod alpm_package;
+pub mod aur_package;
 
-mod aur_package;
+pub use alpm_package::AlpmPackage;
+pub use aur_package::AurPackage;
 
 use alpm::Dep;
-pub use aur_package::AurPackage;
 
 pub trait Package {
     fn name(&self) -> String;
