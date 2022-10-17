@@ -43,7 +43,7 @@ impl<'h> Database<AlpmPackage<'h>> for Pacman<'h> {
         }
     }
 
-    fn dependencies(&self, pkgs: &Vec<impl Package>) -> HashSet<String> {
+    fn dependencies(&self, pkgs: &Vec<AlpmPackage>) -> HashSet<String> {
         let mut deps = HashSet::new();
         for pkg in pkgs {
             deps.extend(

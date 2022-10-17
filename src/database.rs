@@ -10,24 +10,6 @@ pub use pacman::Pacman;
 
 use crate::Package;
 
-/// Get an Alpm handle
-///
-/// Seems wasteful to get a new handle each time this function is called but
-/// alpm doesn't implement Sync so we can't use a static variable.
-pub fn handle() -> Alpm {
-    let handle = Alpm::new("/", "/var/lib/pacman").unwrap();
-    handle
-        .register_syncdb("core", SigLevel::USE_DEFAULT)
-        .unwrap();
-    handle
-        .register_syncdb("extra", SigLevel::USE_DEFAULT)
-        .unwrap();
-    handle
-        .register_syncdb("community", SigLevel::USE_DEFAULT)
-        .unwrap();
-    handle
-}
-
 pub trait Database<Pkg>
 where
     Pkg: Package + Hash + Eq,
@@ -39,7 +21,7 @@ where
     /// Search for packages by queries
     fn search(&self, queries: Vec<String>) -> Vec<Pkg>;
     /// Get the dependencies of packages
-    fn dependencies(&self, pkgs: &Vec<impl Package>) -> HashSet<String>;
+    fn dependencies(&self, pkgs: &Vec<Pkg>) -> HashSet<String>;
     /// Recursively search for dependencies for given packages.
     ///
     /// This operation tries to evaluate the dependencies of given packages,
@@ -47,7 +29,7 @@ where
     ///
     /// Any package names that couldn't have their dependencies resolved are
     /// returned to be processed by the caller.
-    fn dependencies_recursive(&self, pkgs: &Vec<impl Package>) -> (HashSet<&Pkg>, Vec<String>) {
+    fn dependencies_recursive(&self, pkgs: &Vec<Pkg>) -> (HashSet<&Pkg>, Vec<String>) {
         let mut deps = HashSet::new();
         let mut unresolved = vec![];
 

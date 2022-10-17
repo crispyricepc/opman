@@ -1,11 +1,11 @@
 mod database;
 mod display;
+mod ops;
 mod package;
-mod package_ops;
 
 pub use database::Database;
-use database::{handle, Pacman};
-use package::AlpmPackage;
+use database::Pacman;
+use ops::{dependencies, install, search, summary};
 pub use package::Package;
 
 use clap::{command, Parser, Subcommand};
@@ -58,24 +58,12 @@ fn main() {
     // Initialize logger
     build_logger().unwrap();
 
-    let handle = handle();
-    let db = &handle.syncdbs().into_iter().next().unwrap();
-    let sync = Pacman::new(db);
-
     let cli = Cli::parse();
 
     match cli.command {
-        Action::Summary { packages: _ } => todo!(),
-        Action::Dependencies { packages } => {
-            let pkgs = packages
-                .into_iter()
-                .filter_map(|pkg| sync.get_package(pkg))
-                .collect::<Vec<AlpmPackage>>();
-            sync.dependencies(&pkgs);
-        }
-        Action::Search { keywords } => {
-            sync.search(keywords);
-        }
-        Action::Install { packages: _ } => todo!(),
+        Action::Summary { packages } => summary(packages),
+        Action::Dependencies { packages } => dependencies(packages),
+        Action::Search { keywords } => search(keywords),
+        Action::Install { packages } => install(packages),
     }
 }

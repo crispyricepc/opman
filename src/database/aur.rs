@@ -6,6 +6,12 @@ use super::Database;
 
 pub struct Aur;
 
+impl Aur {
+    pub fn new() -> Self {
+        Self
+    }
+}
+
 impl Database<AurPackage> for Aur {
     fn get_package(&self, _name: String) -> Option<AurPackage> {
         todo!()
@@ -19,14 +25,7 @@ impl Database<AurPackage> for Aur {
         todo!()
     }
 
-    fn dependencies(&self, _pkgs: &Vec<impl Package>) -> HashSet<String> {
-        todo!()
-    }
-
-    fn dependencies_recursive(
-        &self,
-        _pkgs: &Vec<impl Package>,
-    ) -> (HashSet<&AurPackage>, Vec<String>) {
+    fn dependencies(&self, _pkgs: &Vec<AurPackage>) -> HashSet<String> {
         todo!()
     }
 }
