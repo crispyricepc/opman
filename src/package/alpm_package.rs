@@ -1,111 +1,39 @@
-use std::hash::Hash;
-
-use alpm::Dep;
-
 use crate::Package;
 
-pub struct AlpmPackage<'h> {
-    inner: alpm::Package<'h>,
-}
+use super::Dependency;
 
-impl<'h> Package for AlpmPackage<'h> {
-    fn name(&self) -> String {
-        todo!()
-    }
-
-    fn version(&self) -> String {
-        todo!()
-    }
-
-    fn desc(&self) -> String {
-        todo!()
-    }
-
-    fn arch(&self) -> String {
-        todo!()
-    }
-
-    fn url(&self) -> String {
-        todo!()
-    }
-
-    fn licenses(&self) -> Vec<String> {
-        todo!()
-    }
-
-    fn groups(&self) -> Vec<String> {
-        todo!()
-    }
-
-    fn provides(&self) -> Vec<String> {
-        todo!()
-    }
-
-    fn depends(&self) -> Vec<Dep> {
-        todo!()
-    }
-
-    fn depends_optional(&self) -> Vec<Dep> {
-        todo!()
-    }
-
-    fn required_by(&self) -> Vec<String> {
-        todo!()
-    }
-
-    fn required_by_optional(&self) -> Vec<String> {
-        todo!()
-    }
-
-    fn conflicts(&self) -> Vec<String> {
-        todo!()
-    }
-
-    fn replaces(&self) -> Vec<String> {
-        todo!()
-    }
-
-    fn installed_size(&self) -> usize {
-        todo!()
-    }
-
-    fn packager(&self) -> String {
-        todo!()
-    }
-
-    fn build_date(&self) -> String {
-        todo!()
-    }
-
-    fn install_date(&self) -> String {
-        todo!()
-    }
-
-    fn install_reason(&self) -> String {
-        todo!()
-    }
-
-    fn validation(&self) -> String {
-        todo!()
+impl<'a> From<alpm::Dep<'a>> for Dependency {
+    fn from(f: alpm::Dep<'a>) -> Self {
+        Dependency {
+            name: f.name().to_string(),
+            version: f.version().map(|v| v.to_string()),
+        }
     }
 }
 
-impl<'h> From<alpm::Package<'h>> for AlpmPackage<'h> {
-    fn from(value: alpm::Package<'h>) -> Self {
-        Self { inner: value }
-    }
-}
-
-impl PartialEq for AlpmPackage<'_> {
-    fn eq(&self, other: &Self) -> bool {
-        self.inner.name() == other.inner.name()
-    }
-}
-
-impl Eq for AlpmPackage<'_> {}
-
-impl Hash for AlpmPackage<'_> {
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        self.inner.name().hash(state);
+impl<'a> From<alpm::Package<'a>> for Package {
+    fn from(f: alpm::Package) -> Self {
+        Package {
+            name: f.name().to_owned(),
+            version: f.version().to_string(),
+            desc: f.desc().map(|s| s.to_owned()),
+            arch: f.arch().map(|s| s.to_owned()),
+            url: f.url().map(|s| s.to_owned()),
+            licenses: f.licenses().into_iter().map(|s| s.to_owned()).collect(),
+            groups: f.groups().into_iter().map(|s| s.to_owned()).collect(),
+            provides: f.provides().into_iter().map(|d| d.into()).collect(),
+            depends: f.depends().into_iter().map(|d| d.into()).collect(),
+            depends_optional: f.optdepends().into_iter().map(|d| d.into()).collect(),
+            required_by: f.required_by().into_iter().collect(),
+            required_by_optional: f.optional_for().into_iter().collect(),
+            conflicts: f.conflicts().into_iter().map(|d| d.into()).collect(),
+            replaces: f.replaces().into_iter().map(|d| d.into()).collect(),
+            installed_size: f.size().try_into().unwrap(),
+            packager: f.packager().map(|s| s.to_owned()),
+            build_date: f.build_date().try_into().unwrap(),
+            install_date: f.install_date().map(|d| d.try_into().unwrap()),
+            install_reason: f.reason(),
+            validation: f.validation(),
+        }
     }
 }

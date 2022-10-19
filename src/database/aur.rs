@@ -1,6 +1,6 @@
-use std::collections::HashSet;
+use anyhow::Result;
 
-use crate::{package::AurPackage, Package};
+use crate::Package;
 
 use super::Database;
 
@@ -12,20 +12,23 @@ impl Aur {
     }
 }
 
-impl Database<AurPackage> for Aur {
-    fn get_package(&self, _name: String) -> Option<AurPackage> {
+impl<'d> Database<'d> for Aur {
+    fn db_name(&self) -> String {
+        "aur".to_string()
+    }
+    fn get_package(&self, name: &String) -> Result<Package> {
         todo!()
     }
 
-    fn get_packages(&self) -> Vec<AurPackage> {
+    fn get_packages(&self) -> Vec<Package> {
         todo!()
     }
 
-    fn search(&self, _queries: Vec<String>) -> Vec<AurPackage> {
+    fn search(&self, queries: Vec<String>) -> Result<Vec<Package>> {
         todo!()
     }
 
-    fn dependencies(&self, _pkgs: &Vec<AurPackage>) -> HashSet<String> {
+    fn dependencies(&self, pkgs: &Vec<Package>) -> Vec<String> {
         todo!()
     }
 }

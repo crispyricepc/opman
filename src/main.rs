@@ -4,7 +4,6 @@ mod ops;
 mod package;
 
 pub use database::Database;
-use database::Pacman;
 use ops::{dependencies, install, search, summary};
 pub use package::Package;
 
@@ -48,7 +47,6 @@ fn build_logger() -> Result<(), fern::InitError> {
                 message
             ))
         })
-        .level(log::LevelFilter::Info)
         .chain(std::io::stderr())
         .apply()?;
     Ok(())
@@ -62,7 +60,7 @@ fn main() {
 
     match cli.command {
         Action::Summary { packages } => summary(packages),
-        Action::Dependencies { packages } => dependencies(packages),
+        Action::Dependencies { packages } => dependencies(&packages),
         Action::Search { keywords } => search(keywords),
         Action::Install { packages } => install(packages),
     }

@@ -1,30 +1,60 @@
+use std::{fmt::Display, hash::Hash};
+
+use alpm::{PackageReason, PackageValidation};
+
 pub mod alpm_package;
-pub mod aur_package;
 
-pub use alpm_package::AlpmPackage;
-pub use aur_package::AurPackage;
+#[derive(Debug)]
+pub struct Dependency {
+    pub name: String,
+    pub version: Option<String>,
+}
 
-use alpm::Dep;
+impl Display for Dependency {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.name)?;
+        if let Some(version) = &self.version {
+            write!(f, " {}", version)?;
+        }
+        Ok(())
+    }
+}
 
-pub trait Package {
-    fn name(&self) -> String;
-    fn version(&self) -> String;
-    fn desc(&self) -> String;
-    fn arch(&self) -> String;
-    fn url(&self) -> String;
-    fn licenses(&self) -> Vec<String>;
-    fn groups(&self) -> Vec<String>;
-    fn provides(&self) -> Vec<String>;
-    fn depends(&self) -> Vec<Dep>;
-    fn depends_optional(&self) -> Vec<Dep>;
-    fn required_by(&self) -> Vec<String>;
-    fn required_by_optional(&self) -> Vec<String>;
-    fn conflicts(&self) -> Vec<String>;
-    fn replaces(&self) -> Vec<String>;
-    fn installed_size(&self) -> usize;
-    fn packager(&self) -> String;
-    fn build_date(&self) -> String;
-    fn install_date(&self) -> String;
-    fn install_reason(&self) -> String;
-    fn validation(&self) -> String;
+#[derive(Debug)]
+pub struct Package {
+    pub name: String,
+    pub version: String,
+    pub desc: Option<String>,
+    pub arch: Option<String>,
+    pub url: Option<String>,
+    pub licenses: Vec<String>,
+    pub groups: Vec<String>,
+    pub provides: Vec<Dependency>,
+    pub depends: Vec<Dependency>,
+    pub depends_optional: Vec<Dependency>,
+    pub required_by: Vec<String>,
+    pub required_by_optional: Vec<String>,
+    pub conflicts: Vec<Dependency>,
+    pub replaces: Vec<Dependency>,
+    pub installed_size: usize,
+    pub packager: Option<String>,
+    pub build_date: usize,
+    pub install_date: Option<usize>,
+    pub install_reason: PackageReason,
+    pub validation: PackageValidation,
+}
+
+impl PartialEq for Package {
+    fn eq(&self, other: &Self) -> bool {
+        self.name == other.name && self.version == other.version
+    }
+}
+
+impl Eq for Package {}
+
+impl Hash for Package {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.name.hash(state);
+        self.version.hash(state);
+    }
 }

@@ -1,10 +1,7 @@
 use alpm::{Alpm, SigLevel};
+use log::{debug, info};
 
-use crate::{
-    database::{Aur, Pacman},
-    package::AlpmPackage,
-    Database, Package,
-};
+use crate::Database;
 
 /// Get an Alpm handle
 ///
@@ -24,27 +21,42 @@ fn handle() -> Alpm {
     handle
 }
 
-fn get_databases<'h>(handle: &'h Alpm) {
+fn get_databases<'h>(handle: &'h Alpm) -> Vec<Box<dyn Database + 'h>> {
     let raw_databases = handle.syncdbs();
-    let dbs: Vec<Box<dyn Database<dyn Package>>> = vec![];
-    for db in raw_databases {
-        dbs.push(Box::new(Pacman::new(&db)));
-    }
-    dbs.push(Box::new(Pacman::new(&handle.localdb())));
-    dbs.push(Box::new(Aur::new()));
+    let mut dbs = vec![];
+    dbs.extend(
+        raw_databases
+            .into_iter()
+            .map(|db| Box::new(db) as Box<dyn Database>),
+    );
+    dbs.push(Box::new(handle.localdb()));
+    dbs
 }
 
 pub fn summary(packages: Vec<String>) {
     todo!()
 }
-pub fn dependencies(packages: Vec<String>) {
-    let pkgs = packages
-        .into_iter()
-        .filter_map(|pkg| sync.get_package(pkg))
-        .collect::<Vec<AlpmPackage>>();
-    sync.dependencies(&pkgs);
+pub fn dependencies(packages: &Vec<String>) {
+    let handle = handle();
+    let dbs = get_databases(&handle);
+
+    for db in &dbs {
+        info!("Searching database {}", db.db_name());
+        for pkg in packages {
+            match db.get_package(pkg) {
+                Ok(pkg) => {
+                    for dep in pkg.depends {
+                        println!("{}", dep);
+                    }
+                }
+                Err(e) => debug!("Failed to get package {} from {}: {}", pkg, db.db_name(), e),
+            }
+        }
+    }
 }
 pub fn search(keywords: Vec<String>) {
-    sync.search(keywords);
+    todo!()
 }
-pub fn install(packages: Vec<String>) {}
+pub fn install(packages: Vec<String>) {
+    todo!()
+}
