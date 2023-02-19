@@ -1,6 +1,6 @@
 use anyhow::Result;
 
-use crate::Package;
+use crate::{package::Dependency, Package};
 
 use super::Database;
 
@@ -12,23 +12,23 @@ impl Aur {
     }
 }
 
-impl<'d> Database<'d> for Aur {
+impl<'d> Database for Aur {
     fn db_name(&self) -> String {
         "aur".to_string()
     }
     fn get_package(&self, name: &String) -> Result<Package> {
-        todo!()
+        Err(anyhow::anyhow!("AUR database not implemented"))
     }
 
-    fn get_packages(&self) -> Vec<Package> {
-        todo!()
+    fn all_packages(&self) -> Vec<Package> {
+        todo!();
     }
 
     fn search(&self, queries: Vec<String>) -> Result<Vec<Package>> {
-        todo!()
+        Err(anyhow::anyhow!("AUR database not implemented"))
     }
 
-    fn dependencies(&self, pkgs: &Vec<Package>) -> Vec<String> {
-        todo!()
+    fn dependencies(&self, pkgs: &Vec<Package>) -> Vec<Dependency> {
+        todo!();
     }
 }

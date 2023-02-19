@@ -4,7 +4,8 @@ mod ops;
 mod package;
 
 pub use database::Database;
-use ops::{dependencies, install, search, summary};
+use display::print_packages;
+use ops::Opman;
 pub use package::Package;
 
 use clap::{command, Parser, Subcommand};
@@ -53,15 +54,26 @@ fn build_logger() -> Result<(), fern::InitError> {
 }
 
 fn main() {
+    let opman = Opman::new();
+
     // Initialize logger
     build_logger().unwrap();
 
     let cli = Cli::parse();
 
     match cli.command {
-        Action::Summary { packages } => summary(packages),
-        Action::Dependencies { packages } => dependencies(&packages),
-        Action::Search { keywords } => search(keywords),
-        Action::Install { packages } => install(packages),
+        Action::Summary { packages } => opman.summary(packages),
+        Action::Dependencies { packages } => {
+            print_packages(
+                opman
+                    .dependencies(&packages)
+                    .unwrap()
+                    .values()
+                    .filter_map(|pkg| pkg.as_ref()),
+                false,
+            );
+        }
+        Action::Search { keywords } => opman.search(keywords),
+        Action::Install { packages } => opman.install(packages),
     }
 }

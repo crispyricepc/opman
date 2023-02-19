@@ -4,10 +4,11 @@ use alpm::{PackageReason, PackageValidation};
 
 pub mod alpm_package;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub struct Dependency {
     pub name: String,
     pub version: Option<String>,
+    pub description: Option<String>,
 }
 
 impl Display for Dependency {
@@ -26,6 +27,7 @@ pub struct Package {
     pub version: String,
     pub desc: Option<String>,
     pub arch: Option<String>,
+    pub db_name: String,
     pub url: Option<String>,
     pub licenses: Vec<String>,
     pub groups: Vec<String>,

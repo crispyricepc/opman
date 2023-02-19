@@ -2,11 +2,11 @@ use alpm::Db;
 use anyhow::Result;
 use log::error;
 
-use crate::Package;
+use crate::{package::Dependency, Package};
 
 use super::Database;
 
-impl<'h> Database<'h> for Db<'h> {
+impl Database for Db<'_> {
     fn db_name(&self) -> String {
         self.name().to_string()
     }
@@ -15,7 +15,7 @@ impl<'h> Database<'h> for Db<'h> {
         Ok(self.pkg(name.as_str())?.into())
     }
 
-    fn get_packages(&self) -> Vec<Package> {
+    fn all_packages(&self) -> Vec<Package> {
         self.pkgs().into_iter().map(|p| p.into()).collect()
     }
 
@@ -26,12 +26,14 @@ impl<'h> Database<'h> for Db<'h> {
             .collect()
     }
 
-    fn dependencies(&self, pkgs: &Vec<Package>) -> Vec<String> {
+    fn dependencies(&self, pkgs: &Vec<Package>) -> Vec<Dependency> {
         let mut deps = vec![];
         for pkg in pkgs {
             match self.pkg(pkg.name.as_str()) {
                 Ok(alpm_pkg) => {
-                    deps.extend(alpm_pkg.depends().into_iter().map(|d| d.name().to_string()));
+                    let deps_to_add: Vec<Dependency> =
+                        alpm_pkg.depends().iter().map(|d| d.into()).collect();
+                    deps.extend(deps_to_add);
                 }
                 Err(e) => {
                     error!("Failed to get package {}: {}", pkg.name, e);
