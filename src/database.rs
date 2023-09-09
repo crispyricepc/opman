@@ -16,11 +16,11 @@ pub trait Database {
     /// Get a package by its name
     fn get_package(&self, name: &String) -> Result<Package>;
     /// Get all the packages in the database
-    fn all_packages(&self) -> Vec<Package>;
+    fn all_packages(&self) -> Result<Vec<Package>>;
     /// Search for packages by queries
     fn search_packages(&self, queries: Vec<String>) -> Result<Vec<Package>>;
     /// Get the dependencies of packages
-    fn dependencies(&self, pkgs: &Vec<Package>) -> Vec<Dependency>;
+    fn dependencies(&self, pkgs: &Vec<Package>) -> Result<Vec<Dependency>>;
     /// Tries to resolve a dependency to a package
     fn resolve_dependency(&self, dep: &Dependency) -> Result<Package> {
         self.get_package(&dep.name)

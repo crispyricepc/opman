@@ -109,6 +109,8 @@ impl Opman {
             results.extend(db.search_packages(keywords.clone())?);
         }
 
+        results.extend(self.aur_db.search_packages(keywords.clone())?);
+
         Ok(results)
     }
 

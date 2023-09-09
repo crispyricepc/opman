@@ -26,8 +26,8 @@ impl Database for Db<'_> {
         Ok(self.pkg(name.as_str())?.into())
     }
 
-    fn all_packages(&self) -> Vec<Package> {
-        self.pkgs().into_iter().map(|p| p.into()).collect()
+    fn all_packages(&self) -> Result<Vec<Package>> {
+        Ok(self.pkgs().into_iter().map(|p| p.into()).collect())
     }
 
     fn search_packages(&self, queries: Vec<String>) -> Result<Vec<Package>> {
@@ -37,7 +37,7 @@ impl Database for Db<'_> {
             .collect()
     }
 
-    fn dependencies(&self, pkgs: &Vec<Package>) -> Vec<Dependency> {
+    fn dependencies(&self, pkgs: &Vec<Package>) -> Result<Vec<Dependency>> {
         let mut deps = vec![];
         for pkg in pkgs {
             match self.pkg(pkg.name.as_str()) {
@@ -51,6 +51,6 @@ impl Database for Db<'_> {
                 }
             }
         }
-        deps
+        Ok(deps)
     }
 }

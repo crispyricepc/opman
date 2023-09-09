@@ -19,18 +19,18 @@ impl<'d> Database for Aur {
         "aur".to_string()
     }
     fn get_package(&self, name: &String) -> Result<Package> {
-        Err(ErrorKind::NotYetImplemented.into())
+        Err(ErrorKind::PackageNotFound.into())
     }
 
-    fn all_packages(&self) -> Vec<Package> {
-        todo!();
+    fn all_packages(&self) -> Result<Vec<Package>> {
+        Ok(vec![])
     }
 
     fn search_packages(&self, queries: Vec<String>) -> Result<Vec<Package>> {
-        Err(ErrorKind::NotYetImplemented.into())
+        Ok(vec![])
     }
 
-    fn dependencies(&self, pkgs: &Vec<Package>) -> Vec<Dependency> {
-        todo!();
+    fn dependencies(&self, pkgs: &Vec<Package>) -> Result<Vec<Dependency>> {
+        Ok(vec![])
     }
 }
