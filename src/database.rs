@@ -6,10 +6,9 @@ use std::{
     fmt::{Debug, Formatter},
 };
 
-use anyhow::Result;
 pub use aur::Aur;
 
-use crate::{package::Dependency, Package};
+use crate::{error::Result, package::Dependency, Package};
 
 pub trait Database {
     /// Get the name of the database

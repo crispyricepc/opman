@@ -1,5 +1,6 @@
 mod database;
 mod display;
+mod error;
 mod ops;
 mod package;
 

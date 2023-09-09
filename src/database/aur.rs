@@ -1,6 +1,8 @@
-use anyhow::Result;
-
-use crate::{package::Dependency, Package};
+use crate::{
+    error::{ErrorKind, Result},
+    package::Dependency,
+    Package,
+};
 
 use super::Database;
 
@@ -17,7 +19,7 @@ impl<'d> Database for Aur {
         "aur".to_string()
     }
     fn get_package(&self, name: &String) -> Result<Package> {
-        Err(anyhow::anyhow!("AUR database not implemented"))
+        Err(ErrorKind::NotYetImplemented.into())
     }
 
     fn all_packages(&self) -> Vec<Package> {
@@ -25,7 +27,7 @@ impl<'d> Database for Aur {
     }
 
     fn search(&self, queries: Vec<String>) -> Result<Vec<Package>> {
-        Err(anyhow::anyhow!("AUR database not implemented"))
+        Err(ErrorKind::NotYetImplemented.into())
     }
 
     fn dependencies(&self, pkgs: &Vec<Package>) -> Vec<Dependency> {

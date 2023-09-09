@@ -4,10 +4,9 @@ use std::{
 };
 
 use alpm::{Alpm, Db, SigLevel};
-use anyhow::Result;
-use log::{debug, info, warn};
+use log::warn;
 
-use crate::{database::Aur, package::Dependency, Database, Package};
+use crate::{database::Aur, error::Result, package::Dependency, Database, Package};
 
 pub struct Opman {
     handle: Alpm,
@@ -115,6 +114,28 @@ impl Opman {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
+
     #[test]
-    fn dependencies() {}
+    fn dependencies() {
+        let opman = Opman::new();
+
+        let git_deps = opman.dependencies(&vec!["git".to_string()]).unwrap();
+        assert_eq!(git_deps.len(), 10);
+
+        let bash_deps = opman.dependencies(&vec!["bash".to_string()]).unwrap();
+        assert_eq!(bash_deps.len(), 4);
+    }
+
+    #[test]
+    fn dependencies_should_fail() {
+        let opman = Opman::new();
+
+        let deps = opman.dependencies(&vec!["this-package-does-not-exist".to_string()]);
+        assert!(deps.is_err());
+        assert_eq!(
+            deps.unwrap_err().kind,
+            crate::error::ErrorKind::PackageNotFound
+        );
+    }
 }

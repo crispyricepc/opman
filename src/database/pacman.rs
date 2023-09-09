@@ -1,10 +1,21 @@
 use alpm::Db;
-use anyhow::Result;
 use log::error;
 
-use crate::{package::Dependency, Package};
+use crate::{error::Result, package::Dependency, Package};
 
 use super::Database;
+
+impl From<alpm::Error> for crate::error::Error {
+    fn from(value: alpm::Error) -> Self {
+        Self {
+            kind: match value {
+                alpm::Error::PkgNotFound => crate::error::ErrorKind::PackageNotFound,
+                _ => crate::error::ErrorKind::Unknown,
+            },
+            parent: Some(Box::new(value)),
+        }
+    }
+}
 
 impl Database for Db<'_> {
     fn db_name(&self) -> String {
