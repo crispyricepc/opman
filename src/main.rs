@@ -76,7 +76,9 @@ fn main() {
                 false,
             );
         }
-        Action::Search { keywords } => opman.search(keywords),
+        Action::Search { keywords } => {
+            opman.search(keywords);
+        }
         Action::Install { packages } => opman.install(packages),
     }
 }

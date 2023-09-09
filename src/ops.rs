@@ -103,7 +103,7 @@ impl Opman {
         Ok(ret)
     }
 
-    pub fn search(&self, keywords: Vec<String>) {
+    pub fn search(&self, keywords: Vec<String>) -> Vec<Package> {
         todo!()
     }
 
@@ -115,6 +115,50 @@ impl Opman {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn get_package() {
+        let opman = Opman::new();
+
+        let git = opman.get_package(&"git".to_string()).unwrap();
+        assert_eq!(git.name, "git");
+    }
+
+    #[test]
+    fn get_package_should_fail() {
+        let opman = Opman::new();
+
+        let git = opman.get_package(&"this-package-does-not-exist".to_string());
+        assert!(git.is_err());
+        assert_eq!(
+            git.unwrap_err().kind,
+            crate::error::ErrorKind::PackageNotFound
+        );
+    }
+
+    #[test]
+    fn get_packages() {
+        let opman = Opman::new();
+
+        let packages = opman
+            .get_packages(&vec!["git".to_string(), "bash".to_string()])
+            .unwrap();
+        assert_eq!(packages.len(), 2);
+        assert!(packages.iter().any(|p| p.name == "git"));
+        assert!(packages.iter().any(|p| p.name == "bash"));
+    }
+
+    #[test]
+    fn get_packages_should_fail() {
+        let opman = Opman::new();
+
+        let packages = opman.get_packages(&vec!["this-package-does-not-exist".to_string()]);
+        assert!(packages.is_err());
+        assert_eq!(
+            packages.unwrap_err().kind,
+            crate::error::ErrorKind::PackageNotFound
+        );
+    }
 
     #[test]
     fn dependencies() {
@@ -138,4 +182,27 @@ mod tests {
             crate::error::ErrorKind::PackageNotFound
         );
     }
+
+    #[test]
+    fn search_one() {
+        let opman = Opman::new();
+
+        let results = opman.search(vec!["gi".to_string()]);
+        assert!(results.iter().any(|p| p.name == "git"));
+
+        let results = opman.search(vec!["ash".to_string()]);
+        assert!(results.iter().any(|p| p.name == "bash"));
+    }
+
+    #[test]
+    fn search_many() {
+        let opman = Opman::new();
+
+        let results = opman.search(vec!["gi".to_string(), "ash".to_string()]);
+        assert!(results.iter().any(|p| p.name == "git"));
+        assert!(results.iter().any(|p| p.name == "bash"));
+    }
+
+    #[test]
+    fn search_no_results() {}
 }
