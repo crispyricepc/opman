@@ -26,7 +26,7 @@ impl<'d> Database for Aur {
         todo!();
     }
 
-    fn search(&self, queries: Vec<String>) -> Result<Vec<Package>> {
+    fn search_packages(&self, queries: Vec<String>) -> Result<Vec<Package>> {
         Err(ErrorKind::NotYetImplemented.into())
     }
 

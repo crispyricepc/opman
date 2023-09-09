@@ -103,8 +103,13 @@ impl Opman {
         Ok(ret)
     }
 
-    pub fn search(&self, keywords: Vec<String>) -> Vec<Package> {
-        todo!()
+    pub fn search(&self, keywords: Vec<String>) -> Result<Vec<Package>> {
+        let mut results = Vec::<Package>::new();
+        for db in self.alpm_databases() {
+            results.extend(db.search_packages(keywords.clone())?);
+        }
+
+        Ok(results)
     }
 
     pub fn install(&self, packages: Vec<String>) {
@@ -187,10 +192,10 @@ mod tests {
     fn search_one() {
         let opman = Opman::new();
 
-        let results = opman.search(vec!["gi".to_string()]);
+        let results = opman.search(vec!["git".to_string()]).unwrap();
         assert!(results.iter().any(|p| p.name == "git"));
 
-        let results = opman.search(vec!["ash".to_string()]);
+        let results = opman.search(vec!["ash".to_string()]).unwrap();
         assert!(results.iter().any(|p| p.name == "bash"));
     }
 
@@ -198,9 +203,10 @@ mod tests {
     fn search_many() {
         let opman = Opman::new();
 
-        let results = opman.search(vec!["gi".to_string(), "ash".to_string()]);
-        assert!(results.iter().any(|p| p.name == "git"));
-        assert!(results.iter().any(|p| p.name == "bash"));
+        let results = opman
+            .search(vec!["ttf".to_string(), "gnu".to_string(), "ee".to_string()])
+            .unwrap();
+        assert!(results.iter().any(|p| p.name == "gnu-free-fonts"));
     }
 
     #[test]

@@ -30,7 +30,7 @@ impl Database for Db<'_> {
         self.pkgs().into_iter().map(|p| p.into()).collect()
     }
 
-    fn search(&self, queries: Vec<String>) -> Result<Vec<Package>> {
+    fn search_packages(&self, queries: Vec<String>) -> Result<Vec<Package>> {
         self.search(queries.into_iter().map(|s| s))?
             .into_iter()
             .map(|p| Ok(p.into()))

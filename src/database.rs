@@ -18,7 +18,7 @@ pub trait Database {
     /// Get all the packages in the database
     fn all_packages(&self) -> Vec<Package>;
     /// Search for packages by queries
-    fn search(&self, queries: Vec<String>) -> Result<Vec<Package>>;
+    fn search_packages(&self, queries: Vec<String>) -> Result<Vec<Package>>;
     /// Get the dependencies of packages
     fn dependencies(&self, pkgs: &Vec<Package>) -> Vec<Dependency>;
     /// Tries to resolve a dependency to a package
