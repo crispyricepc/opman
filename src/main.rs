@@ -77,7 +77,7 @@ fn main() {
             );
         }
         Action::Search { keywords } => {
-            opman.search(keywords);
+            print_packages(opman.search(keywords).unwrap().iter(), false);
         }
         Action::Install { packages } => opman.install(packages),
     }
