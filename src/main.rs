@@ -4,7 +4,7 @@ mod ops;
 mod package;
 
 pub use database::Database;
-use display::print_packages;
+use display::{print_packages, print_summary};
 use ops::Opman;
 pub use package::Package;
 
@@ -62,7 +62,9 @@ fn main() {
     let cli = Cli::parse();
 
     match cli.command {
-        Action::Summary { packages } => opman.summary(packages),
+        Action::Summary { packages } => {
+            print_summary(opman.summary(packages).unwrap());
+        }
         Action::Dependencies { packages } => {
             print_packages(
                 opman

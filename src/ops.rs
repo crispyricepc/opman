@@ -14,6 +14,11 @@ pub struct Opman {
     aur_db: Aur,
 }
 
+pub struct PackageSummary {
+    pub count: u32,
+    pub total_size: usize,
+}
+
 impl Opman {
     pub fn new() -> Self {
         let handle = Alpm::new("/", "/var/lib/pacman").unwrap();
@@ -38,8 +43,15 @@ impl Opman {
         once(self.handle.localdb()).chain(self.handle.syncdbs())
     }
 
-    pub fn summary(&self, packages: Vec<String>) {
-        todo!()
+    pub fn summary(&self, packages: Vec<String>) -> Result<PackageSummary> {
+        let packages = self.get_packages(&packages)?;
+
+        let ret = PackageSummary {
+            count: packages.len() as u32,
+            total_size: packages.iter().map(|pkg| pkg.installed_size).sum(),
+        };
+
+        Ok(ret)
     }
 
     pub fn get_package(&self, package_name: &String) -> Result<Package> {
